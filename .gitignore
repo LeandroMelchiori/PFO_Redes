@@ -5,6 +5,7 @@ AGENTS.md
 .venv/
 tmp/
 output/
+material/
 *.py[cod]
 *.db
 .env
