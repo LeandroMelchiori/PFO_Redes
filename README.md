@@ -2,6 +2,73 @@
 
 API REST desarrollada con Flask y SQLite. Permite registrar usuarios, iniciar y cerrar sesión, y acceder a una página protegida de tareas. Las contraseñas se almacenan mediante hashes seguros de Werkzeug.
 
+## PFO 3 - Arquitectura distribuida
+
+El rediseño distribuye la recepción, el procesamiento y el almacenamiento de las tareas entre varios componentes.
+
+```mermaid
+flowchart TB
+    subgraph clientes[CLIENTES]
+        direction LR
+        web[Cliente web<br/>Navegador]
+        movil[Cliente móvil<br/>Aplicación]
+    end
+
+    balanceador[Balanceador de carga<br/>Nginx / HAProxy]
+
+    subgraph sockets[SERVIDORES DE SOCKETS]
+        direction LR
+        servidor1[Servidor de sockets 1<br/>Autenticación y gestión de tareas]
+        servidor2[Servidor de sockets 2<br/>Autenticación y gestión de tareas]
+    end
+
+    cola[Cola de mensajes<br/>RabbitMQ]
+
+    subgraph procesamiento[PROCESAMIENTO]
+        direction LR
+        worker1[Servidor worker 1<br/>Pool de hilos]
+        worker2[Servidor worker 2<br/>Pool de hilos]
+    end
+
+    subgraph almacenamiento[ALMACENAMIENTO DISTRIBUIDO]
+        direction LR
+        postgres[(PostgreSQL<br/>Usuarios y tareas)]
+        s3[(S3<br/>Archivos)]
+    end
+
+    web -->|HTTPS / TCP| balanceador
+    movil -->|HTTPS / TCP| balanceador
+    balanceador -->|Distribución| servidor1
+    balanceador -->|Distribución| servidor2
+    servidor1 <-->|Tareas y resultados| cola
+    servidor2 <-->|Tareas y resultados| cola
+    cola <-->|Procesamiento asíncrono| worker1
+    cola <-->|Procesamiento asíncrono| worker2
+    worker1 --> postgres
+    worker1 --> s3
+    worker2 --> postgres
+    worker2 --> s3
+
+    classDef cliente fill:#dbeafe,stroke:#2563eb,color:#172554,stroke-width:2px;
+    classDef balance fill:#ede9fe,stroke:#7c3aed,color:#2e1065,stroke-width:2px;
+    classDef servidor fill:#ffedd5,stroke:#ea580c,color:#431407,stroke-width:2px;
+    classDef mensajes fill:#ffe4e6,stroke:#e11d48,color:#4c0519,stroke-width:2px;
+    classDef worker fill:#ccfbf1,stroke:#0f766e,color:#042f2e,stroke-width:2px;
+    classDef datos fill:#dcfce7,stroke:#16a34a,color:#052e16,stroke-width:2px;
+
+    class web,movil cliente;
+    class balanceador balance;
+    class servidor1,servidor2 servidor;
+    class cola mensajes;
+    class worker1,worker2 worker;
+    class postgres,s3 datos;
+
+    style clientes fill:#eff6ff,stroke:#93c5fd,stroke-width:1px
+    style sockets fill:#fff7ed,stroke:#fdba74,stroke-width:1px
+    style procesamiento fill:#f0fdfa,stroke:#5eead4,stroke-width:1px
+    style almacenamiento fill:#f0fdf4,stroke:#86efac,stroke-width:1px
+```
+
 ## Requisitos
 
 - Python 3.10 o superior.
