@@ -2,10 +2,6 @@
 
 Sistema cliente-servidor desarrollado en Python. El servidor recibe tareas mediante sockets TCP y las distribuye entre un pool de workers para procesarlas de forma concurrente.
 
-Alumno:
-
-- Leandro Melchiori - Comisión D
-
 ## Arquitectura
 
 ```mermaid
@@ -65,17 +61,17 @@ flowchart TB
     style almacenamiento fill:#ffffff,stroke:#94a3b8,stroke-width:1px
 ```
 
-El diagrama representa el diseño completo solicitado. La implementación local se concentra en la comunicación por sockets y la distribución concurrente entre workers. RabbitMQ, PostgreSQL, S3 y el balanceador quedan definidos como la evolución necesaria para desplegar varias instancias.
+El diagrama representa la arquitectura distribuida del sistema. La implementación local se concentra en la comunicación por sockets y la distribución concurrente entre workers. RabbitMQ, PostgreSQL, S3 y el balanceador quedan definidos como la evolución necesaria para desplegar varias instancias.
 
 ## Estructura
 
 ```text
 .
-├── cliente.py             # Cliente de consola del PFO3
+├── cliente.py             # Cliente de consola
 ├── protocolo.py           # Intercambio de mensajes JSON por TCP
 ├── servidor.py            # Servidor y pool de workers
-├── tests/                 # Pruebas del PFO3
-├── pfo2/                  # Código y documentación de la entrega anterior
+├── tests/                 # Pruebas automáticas
+├── pfo2/                  # Versión anterior con Flask y SQLite
 └── docs/                  # Documentación publicada con GitHub Pages
 ```
 
@@ -162,10 +158,10 @@ py -m pytest -q
 
 Las pruebas verifican el procesamiento de tareas, el rechazo de datos incorrectos, la validación del protocolo y el recorrido completo entre el cliente, el servidor y los workers.
 
-## Entrega anterior
+## Versión anterior
 
-El PFO2 se conserva en [`pfo2/`](pfo2/README.md), con su API Flask, cliente, pruebas y capturas originales.
+La versión anterior, basada en Flask y SQLite, se conserva en [`pfo2/`](pfo2/README.md), junto con su cliente, pruebas y capturas.
 
 ## Documentación publicada
 
-La documentación del PFO3 se publica mediante [GitHub Pages](https://leandromelchiori.github.io/PFO_Redes/). La versión anterior permanece disponible en la sección dedicada al PFO2.
+La documentación del proyecto se publica mediante [GitHub Pages](https://leandromelchiori.github.io/PFO_Redes/). También se puede consultar la [documentación de la versión anterior](https://leandromelchiori.github.io/PFO_Redes/pfo2/).
