@@ -3,162 +3,197 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="PFO 2: servidor Flask con registro, login y acceso protegido.">
-  <title>PFO 2 - Sistema de gestión de tareas</title>
+  <meta name="description" content="PFO 3: sistema distribuido de tareas desarrollado con sockets TCP y workers en Python.">
+  <title>PFO 3 - Sistema distribuido de tareas</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <a class="skip-link" href="#contenido">Saltar al contenido</a>
 
-  <header>
-    <div class="container">
-      <p class="materia">Programación sobre redes</p>
-      <h1>PFO 2 - Sistema de gestión de tareas</h1>
-      <p>Servidor desarrollado con Flask y SQLite.</p>
-    </div>
+  <header class="site-header">
+    <nav class="nav container" aria-label="Navegación principal">
+      <a class="brand" href="#inicio">PFO Redes</a>
+      <div class="nav-links">
+        <a href="#arquitectura">Arquitectura</a>
+        <a href="#implementacion">Implementación</a>
+        <a href="#ejecucion">Ejecución</a>
+      </div>
+    </nav>
   </header>
 
-  <main class="container" id="contenido">
-    <section>
-      <h2>Descripción</h2>
-      <p>
-        El proyecto permite registrar usuarios, iniciar sesión y acceder a una
-        página protegida. Las contraseñas se guardan como hashes y los datos se
-        almacenan en una base SQLite.
-      </p>
-      <p>
-        Código fuente disponible en
-        <a href="https://github.com/LeandroMelchiori/PFO2_Redes">GitHub</a>.
-      </p>
-    </section>
-
-    <section>
-      <h2>Endpoints</h2>
-      <div class="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th>Método</th>
-              <th>Ruta</th>
-              <th>Descripción</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><code>POST</code></td>
-              <td><code>/registro</code></td>
-              <td>Registra un usuario nuevo.</td>
-            </tr>
-            <tr>
-              <td><code>POST</code></td>
-              <td><code>/login</code></td>
-              <td>Verifica las credenciales e inicia la sesión.</td>
-            </tr>
-            <tr>
-              <td><code>GET</code></td>
-              <td><code>/tareas</code></td>
-              <td>Muestra la bienvenida al usuario autenticado.</td>
-            </tr>
-            <tr>
-              <td><code>POST</code></td>
-              <td><code>/logout</code></td>
-              <td>Cierra la sesión.</td>
-            </tr>
-          </tbody>
-        </table>
+  <main id="contenido">
+    <section class="hero" id="inicio">
+      <div class="container hero-content">
+        <p class="eyebrow">Programación sobre redes</p>
+        <h1>Sistema distribuido de tareas</h1>
+        <p class="hero-description">
+          Rediseño cliente-servidor que recibe tareas mediante sockets TCP y las
+          distribuye entre un pool de workers para procesarlas de forma concurrente.
+        </p>
+        <div class="meta" aria-label="Datos de la entrega">
+          <span>PFO 3</span>
+          <span>Leandro Melchiori</span>
+          <span>Comisión D</span>
+        </div>
+        <div class="actions">
+          <a class="button button-primary" href="https://github.com/LeandroMelchiori/PFO_Redes">Ver código en GitHub</a>
+          <a class="button button-secondary" href="pfo2/">Consultar PFO 2</a>
+        </div>
       </div>
     </section>
 
-    <section>
-      <h2>Formato de registro y login</h2>
-      <pre><code>{
-  "usuario": "Leandro",
-  "contraseña": "1234"
-}</code></pre>
-    </section>
+    <section class="section container" aria-labelledby="resumen-titulo">
+      <div class="section-heading">
+        <p class="section-label">Descripción</p>
+        <h2 id="resumen-titulo">Del cliente al worker</h2>
+        <p>
+          La solución separa la recepción de solicitudes, el procesamiento y el
+          almacenamiento para permitir que cada parte escale de manera independiente.
+        </p>
+      </div>
 
-    <section>
-      <h2>Cliente de consola</h2>
-      <p>
-        El archivo <code>cliente.py</code> permite registrar usuarios, iniciar
-        sesión, consultar la página de tareas y cerrar la sesión desde una
-        terminal. Utiliza <code>requests.Session</code> para conservar la cookie
-        enviada por el servidor.
-      </p>
-    </section>
-
-    <section>
-      <h2>Pruebas realizadas</h2>
-      <p>Se comprobó el registro y el acceso a la ruta protegida.</p>
-
-      <div class="screenshots">
-        <figure>
-          <img src="assets/registro-exitoso.png" width="960" height="540" loading="lazy"
-               alt="Respuesta del servidor después de registrar al usuario Leandro">
-          <figcaption>Registro de usuario.</figcaption>
-        </figure>
-        <figure>
-          <img src="assets/acceso-tareas.png" width="960" height="540" loading="lazy"
-               alt="Página de bienvenida después de iniciar sesión como Leandro">
-          <figcaption>Acceso con una sesión válida.</figcaption>
-        </figure>
+      <div class="summary-grid">
+        <article class="summary-card">
+          <span class="card-number">01</span>
+          <h3>Comunicación TCP</h3>
+          <p>El cliente y el servidor intercambian mensajes JSON delimitados por un salto de línea.</p>
+        </article>
+        <article class="summary-card">
+          <span class="card-number">02</span>
+          <h3>Procesamiento concurrente</h3>
+          <p>Un pool configurable de hilos distribuye las tareas entre varios workers.</p>
+        </article>
+        <article class="summary-card">
+          <span class="card-number">03</span>
+          <h3>Arquitectura escalable</h3>
+          <p>El diseño contempla balanceo, mensajería y almacenamiento distribuido.</p>
+        </article>
       </div>
     </section>
 
-    <section>
-      <h2>Ejecución local</h2>
-      <h3>1. Preparar el entorno</h3>
-      <pre><code>py -m venv .venv
-.\.venv\Scripts\Activate.ps1
-py -m pip install -r requirements.txt</code></pre>
+    <section class="section section-muted" id="arquitectura" aria-labelledby="arquitectura-titulo">
+      <div class="container">
+        <div class="section-heading">
+          <p class="section-label">Diagrama del sistema</p>
+          <h2 id="arquitectura-titulo">Arquitectura distribuida</h2>
+          <p>El recorrido muestra cómo se reciben, distribuyen, procesan y almacenan las tareas.</p>
+        </div>
 
-      <h3>2. Iniciar el servidor</h3>
-      <pre><code>$env:SECRET_KEY = "una-clave-local-larga-y-aleatoria"
-py servidor.py</code></pre>
+        <div class="architecture" aria-label="Diagrama de arquitectura distribuida">
+          <div class="architecture-layer">
+            <p class="layer-title">Clientes</p>
+            <div class="node-grid two-columns">
+              <div class="node"><strong>Cliente web</strong><span>Navegador</span></div>
+              <div class="node"><strong>Cliente móvil</strong><span>Aplicación</span></div>
+            </div>
+          </div>
 
-      <h3>3. Ejecutar el cliente</h3>
-      <p>En otra terminal:</p>
-      <pre><code>.\.venv\Scripts\Activate.ps1
-py cliente.py</code></pre>
+          <div class="flow-arrow" aria-hidden="true"><span>TCP</span></div>
+          <div class="node node-featured node-single"><strong>Balanceador de carga</strong><span>Nginx / HAProxy</span></div>
+          <div class="flow-arrow" aria-hidden="true"><span>Distribución</span></div>
 
-      <h3>4. Ejecutar las pruebas</h3>
-      <pre><code>py -m pip install -r requirements-dev.txt
-py -m pytest -v</code></pre>
+          <div class="architecture-layer">
+            <p class="layer-title">Servidores de sockets</p>
+            <div class="node-grid two-columns">
+              <div class="node"><strong>Servidor 1</strong><span>Gestión de tareas</span></div>
+              <div class="node"><strong>Servidor 2</strong><span>Gestión de tareas</span></div>
+            </div>
+          </div>
+
+          <div class="flow-arrow" aria-hidden="true"><span>Tareas y resultados</span></div>
+          <div class="node node-featured node-single"><strong>Cola de mensajes</strong><span>RabbitMQ</span></div>
+          <div class="flow-arrow" aria-hidden="true"><span>Procesamiento asíncrono</span></div>
+
+          <div class="architecture-bottom">
+            <div class="architecture-layer">
+              <p class="layer-title">Servidores workers</p>
+              <div class="node-grid two-columns">
+                <div class="node"><strong>Worker 1</strong><span>Pool de hilos</span></div>
+                <div class="node"><strong>Worker 2</strong><span>Pool de hilos</span></div>
+              </div>
+            </div>
+            <div class="architecture-layer">
+              <p class="layer-title">Almacenamiento distribuido</p>
+              <div class="node-grid two-columns">
+                <div class="node"><strong>PostgreSQL</strong><span>Usuarios y tareas</span></div>
+                <div class="node"><strong>S3</strong><span>Archivos</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <p class="scope-note">
+          La demostración local implementa el servidor TCP y el pool de workers.
+          RabbitMQ, PostgreSQL, S3 y el balanceador representan el diseño objetivo para un despliegue distribuido.
+        </p>
+      </div>
     </section>
 
-    <section>
-      <h2>Respuestas conceptuales</h2>
+    <section class="section container" id="implementacion" aria-labelledby="implementacion-titulo">
+      <div class="section-heading">
+        <p class="section-label">Código</p>
+        <h2 id="implementacion-titulo">Implementación en Python</h2>
+        <p>La aplicación usa únicamente módulos incluidos con Python para su ejecución.</p>
+      </div>
 
-      <h3>¿Por qué hashear contraseñas?</h3>
-      <p>
-        El hash evita guardar la contraseña original. Si alguien obtiene la
-        base de datos, no encuentra las claves en texto plano. Para validar el
-        acceso se compara la contraseña ingresada con el hash almacenado.
-        Werkzeug utiliza un algoritmo lento y una sal aleatoria, lo que
-        dificulta los ataques por diccionario.
-      </p>
-
-      <h3>Ventajas de usar SQLite en este proyecto</h3>
-      <p>
-        SQLite no requiere instalar ni administrar un servidor de base de
-        datos. Guarda la información en un único archivo, viene integrado con
-        Python y ofrece transacciones, restricciones y consultas SQL. Es
-        apropiado para una aplicación de bajo tráfico y permite trasladar o
-        respaldar los datos con facilidad.
-      </p>
+      <div class="implementation-grid">
+        <article class="implementation-card">
+          <p class="file-name">servidor.py</p>
+          <h3>Servidor y workers</h3>
+          <p>Acepta conexiones TCP, valida las solicitudes y deriva cada tarea a un <code>ThreadPoolExecutor</code>.</p>
+        </article>
+        <article class="implementation-card">
+          <p class="file-name">cliente.py</p>
+          <h3>Cliente de consola</h3>
+          <p>Permite enviar tareas, recibir resultados y conocer qué worker realizó el procesamiento.</p>
+        </article>
+        <article class="implementation-card">
+          <p class="file-name">protocolo.py</p>
+          <h3>Protocolo compartido</h3>
+          <p>Serializa mensajes JSON y controla su formato y tamaño antes de enviarlos por el socket.</p>
+        </article>
+      </div>
     </section>
 
-    <section>
-      <h2>Publicación</h2>
-      <p>
-        GitHub Pages aloja esta documentación y las capturas. El servidor Flask
-        y la base SQLite se ejecutan de forma local.
-      </p>
+    <section class="section section-dark" id="ejecucion" aria-labelledby="ejecucion-titulo">
+      <div class="container execution-layout">
+        <div>
+          <p class="section-label">Uso local</p>
+          <h2 id="ejecucion-titulo">Ejecución y pruebas</h2>
+          <p>El servidor y el cliente se ejecutan en terminales separadas.</p>
+        </div>
+        <div class="commands">
+          <div>
+            <span>1. Iniciar el servidor</span>
+            <pre><code>py servidor.py</code></pre>
+          </div>
+          <div>
+            <span>2. Ejecutar el cliente</span>
+            <pre><code>py cliente.py</code></pre>
+          </div>
+          <div>
+            <span>3. Ejecutar las pruebas</span>
+            <pre><code>py -m pytest -q</code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section container previous-version" aria-labelledby="anterior-titulo">
+      <div>
+        <p class="section-label">Historial del proyecto</p>
+        <h2 id="anterior-titulo">Entrega anterior</h2>
+        <p>La API Flask con autenticación y SQLite se conserva junto con sus pruebas y capturas.</p>
+      </div>
+      <a class="text-link" href="pfo2/">Abrir documentación del PFO 2</a>
     </section>
   </main>
 
-  <footer class="container">
-    <p>Leandro Melchiori</p>
+  <footer>
+    <div class="container footer-content">
+      <p>Leandro Melchiori - Comisión D</p>
+      <a href="#inicio">Volver al inicio</a>
+    </div>
   </footer>
 </body>
 </html>

@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="PFO 2: servidor Flask con registro, login y acceso protegido.">
+  <title>PFO 2 - Sistema de gestión de tareas</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#contenido">Saltar al contenido</a>
+
+  <header>
+    <div class="container">
+      <p class="materia">Programación sobre redes</p>
+      <h1>PFO 2 - Sistema de gestión de tareas</h1>
+      <p>Servidor desarrollado con Flask y SQLite.</p>
+    </div>
+  </header>
+
+  <main class="container" id="contenido">
+    <section>
+      <h2>Descripción</h2>
+      <p>
+        El proyecto permite registrar usuarios, iniciar sesión y acceder a una
+        página protegida. Las contraseñas se guardan como hashes y los datos se
+        almacenan en una base SQLite.
+      </p>
+      <p>
+        Código fuente disponible en
+        <a href="https://github.com/LeandroMelchiori/PFO_Redes/tree/main/pfo2">GitHub</a>.
+      </p>
+    </section>
+
+    <section>
+      <h2>Endpoints</h2>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Método</th>
+              <th>Ruta</th>
+              <th>Descripción</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>POST</code></td>
+              <td><code>/registro</code></td>
+              <td>Registra un usuario nuevo.</td>
+            </tr>
+            <tr>
+              <td><code>POST</code></td>
+              <td><code>/login</code></td>
+              <td>Verifica las credenciales e inicia la sesión.</td>
+            </tr>
+            <tr>
+              <td><code>GET</code></td>
+              <td><code>/tareas</code></td>
+              <td>Muestra la bienvenida al usuario autenticado.</td>
+            </tr>
+            <tr>
+              <td><code>POST</code></td>
+              <td><code>/logout</code></td>
+              <td>Cierra la sesión.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
+      <h2>Formato de registro y login</h2>
+      <pre><code>{
+  "usuario": "Leandro",
+  "contraseña": "1234"
+}</code></pre>
+    </section>
+
+    <section>
+      <h2>Cliente de consola</h2>
+      <p>
+        El archivo <code>cliente.py</code> permite registrar usuarios, iniciar
+        sesión, consultar la página de tareas y cerrar la sesión desde una
+        terminal. Utiliza <code>requests.Session</code> para conservar la cookie
+        enviada por el servidor.
+      </p>
+    </section>
+
+    <section>
+      <h2>Pruebas realizadas</h2>
+      <p>Se comprobó el registro y el acceso a la ruta protegida.</p>
+
+      <div class="screenshots">
+        <figure>
+          <img src="assets/registro-exitoso.png" width="960" height="540" loading="lazy"
+               alt="Respuesta del servidor después de registrar al usuario Leandro">
+          <figcaption>Registro de usuario.</figcaption>
+        </figure>
+        <figure>
+          <img src="assets/acceso-tareas.png" width="960" height="540" loading="lazy"
+               alt="Página de bienvenida después de iniciar sesión como Leandro">
+          <figcaption>Acceso con una sesión válida.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section>
+      <h2>Ejecución local</h2>
+      <h3>1. Preparar el entorno</h3>
+      <pre><code>py -m venv .venv
+.\.venv\Scripts\Activate.ps1
+py -m pip install -r requirements.txt</code></pre>
+
+      <h3>2. Iniciar el servidor</h3>
+      <pre><code>$env:SECRET_KEY = "una-clave-local-larga-y-aleatoria"
+py servidor.py</code></pre>
+
+      <h3>3. Ejecutar el cliente</h3>
+      <p>En otra terminal:</p>
+      <pre><code>.\.venv\Scripts\Activate.ps1
+py cliente.py</code></pre>
+
+      <h3>4. Ejecutar las pruebas</h3>
+      <pre><code>py -m pip install -r requirements-dev.txt
+py -m pytest -v</code></pre>
+    </section>
+
+    <section>
+      <h2>Respuestas conceptuales</h2>
+
+      <h3>¿Por qué hashear contraseñas?</h3>
+      <p>
+        El hash evita guardar la contraseña original. Si alguien obtiene la
+        base de datos, no encuentra las claves en texto plano. Para validar el
+        acceso se compara la contraseña ingresada con el hash almacenado.
+        Werkzeug utiliza un algoritmo lento y una sal aleatoria, lo que
+        dificulta los ataques por diccionario.
+      </p>
+
+      <h3>Ventajas de usar SQLite en este proyecto</h3>
+      <p>
+        SQLite no requiere instalar ni administrar un servidor de base de
+        datos. Guarda la información en un único archivo, viene integrado con
+        Python y ofrece transacciones, restricciones y consultas SQL. Es
+        apropiado para una aplicación de bajo tráfico y permite trasladar o
+        respaldar los datos con facilidad.
+      </p>
+    </section>
+
+    <section>
+      <h2>Publicación</h2>
+      <p>
+        GitHub Pages aloja esta documentación y las capturas. El servidor Flask
+        y la base SQLite se ejecutan de forma local.
+      </p>
+    </section>
+  </main>
+
+  <footer class="container">
+    <p>Leandro Melchiori</p>
+  </footer>
+</body>
+</html>

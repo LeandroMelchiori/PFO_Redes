@@ -76,7 +76,7 @@ El diagrama representa el diseño completo solicitado. La implementación local 
 ├── servidor.py            # Servidor y pool de workers
 ├── tests/                 # Pruebas del PFO3
 ├── pfo2/                  # Código y documentación de la entrega anterior
-└── docs/                  # GitHub Pages de la entrega anterior
+└── docs/                  # Documentación publicada con GitHub Pages
 ```
 
 ## Requisitos
@@ -165,3 +165,7 @@ Las pruebas verifican el procesamiento de tareas, el rechazo de datos incorrecto
 ## Entrega anterior
 
 El PFO2 se conserva en [`pfo2/`](pfo2/README.md), con su API Flask, cliente, pruebas y capturas originales.
+
+## Documentación publicada
+
+La documentación del PFO3 se publica mediante [GitHub Pages](https://leandromelchiori.github.io/PFO_Redes/). La versión anterior permanece disponible en la sección dedicada al PFO2.
