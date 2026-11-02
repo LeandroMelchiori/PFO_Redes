@@ -3,197 +3,192 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="PFO 3: sistema distribuido de tareas desarrollado con sockets TCP y workers en Python.">
+  <meta name="description" content="Documentación del PFO 3: arquitectura, servidor TCP, workers y ejecución en Python.">
   <title>PFO 3 - Sistema distribuido de tareas</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <a class="skip-link" href="#contenido">Saltar al contenido</a>
 
-  <header class="site-header">
-    <nav class="nav container" aria-label="Navegación principal">
-      <a class="brand" href="#inicio">PFO Redes</a>
-      <div class="nav-links">
-        <a href="#arquitectura">Arquitectura</a>
-        <a href="#implementacion">Implementación</a>
-        <a href="#ejecucion">Ejecución</a>
-      </div>
-    </nav>
+  <header id="inicio">
+    <div class="container">
+      <p class="materia">Programación sobre redes</p>
+      <h1>PFO 3 - Sistema distribuido de tareas</h1>
+      <p>Rediseño como sistema distribuido.</p>
+    </div>
   </header>
 
-  <main id="contenido">
-    <section class="hero" id="inicio">
-      <div class="container hero-content">
-        <p class="eyebrow">Programación sobre redes</p>
-        <h1>Sistema distribuido de tareas</h1>
-        <p class="hero-description">
-          Rediseño cliente-servidor que recibe tareas mediante sockets TCP y las
-          distribuye entre un pool de workers para procesarlas de forma concurrente.
-        </p>
-        <div class="meta" aria-label="Datos de la entrega">
-          <span>PFO 3</span>
-          <span>Leandro Melchiori</span>
-          <span>Comisión D</span>
-        </div>
-        <div class="actions">
-          <a class="button button-primary" href="https://github.com/LeandroMelchiori/PFO_Redes">Ver código en GitHub</a>
-          <a class="button button-secondary" href="pfo2/">Consultar PFO 2</a>
-        </div>
-      </div>
+  <main class="container" id="contenido">
+    <section aria-labelledby="descripcion-titulo">
+      <h2 id="descripcion-titulo">Descripción</h2>
+      <p>
+        Sistema cliente-servidor desarrollado en Python. El servidor recibe
+        tareas mediante sockets TCP y las distribuye entre un pool de workers
+        para procesarlas de forma concurrente.
+      </p>
+      <p>Alumno:</p>
+      <ul>
+        <li>Leandro Melchiori - Comisión D</li>
+      </ul>
+      <p>
+        Código fuente disponible en
+        <a href="https://github.com/LeandroMelchiori/PFO_Redes">GitHub</a>.
+        <a href="pfo2/">Documentación de la entrega anterior (PFO 2)</a>.
+      </p>
+      <nav aria-label="Secciones de la documentación">
+        <ul class="section-links">
+          <li><a href="#arquitectura">Arquitectura</a></li>
+          <li><a href="#implementacion">Implementación</a></li>
+          <li><a href="#ejecucion">Ejecución</a></li>
+          <li><a href="#protocolo">Protocolo</a></li>
+          <li><a href="#pruebas">Pruebas</a></li>
+        </ul>
+      </nav>
     </section>
 
-    <section class="section container" aria-labelledby="resumen-titulo">
-      <div class="section-heading">
-        <p class="section-label">Descripción</p>
-        <h2 id="resumen-titulo">Del cliente al worker</h2>
-        <p>
-          La solución separa la recepción de solicitudes, el procesamiento y el
-          almacenamiento para permitir que cada parte escale de manera independiente.
-        </p>
-      </div>
+    <section id="arquitectura" aria-labelledby="arquitectura-titulo">
+      <h2 id="arquitectura-titulo">Arquitectura</h2>
+      <figure>
+        <a class="diagram-link" href="assets/arquitectura.svg" aria-label="Abrir el diagrama de arquitectura en tamaño completo">
+          <img class="diagram" src="assets/arquitectura.svg" width="560" height="1031"
+               alt="Clientes web y móvil conectados al balanceador, dos servidores de sockets, una cola RabbitMQ y dos workers conectados a PostgreSQL y S3. Las conexiones de la cola con servidores y workers son bidireccionales.">
+        </a>
+        <figcaption>
+          Diagrama generado a partir del Mermaid del README.
+          <a href="assets/arquitectura.svg">Ver en tamaño completo</a>.
+        </figcaption>
+      </figure>
+      <p>
+        El diagrama representa el diseño completo solicitado. La implementación
+        local se concentra en la comunicación por sockets y la distribución
+        concurrente entre workers. RabbitMQ, PostgreSQL, S3 y el balanceador
+        quedan definidos como la evolución necesaria para desplegar varias instancias.
+      </p>
 
-      <div class="summary-grid">
-        <article class="summary-card">
-          <span class="card-number">01</span>
-          <h3>Comunicación TCP</h3>
-          <p>El cliente y el servidor intercambian mensajes JSON delimitados por un salto de línea.</p>
-        </article>
-        <article class="summary-card">
-          <span class="card-number">02</span>
-          <h3>Procesamiento concurrente</h3>
-          <p>Un pool configurable de hilos distribuye las tareas entre varios workers.</p>
-        </article>
-        <article class="summary-card">
-          <span class="card-number">03</span>
-          <h3>Arquitectura escalable</h3>
-          <p>El diseño contempla balanceo, mensajería y almacenamiento distribuido.</p>
-        </article>
-      </div>
+      <h3>Recorrido de una tarea</h3>
+      <ol>
+        <li>El balanceador distribuye las conexiones entre los servidores de sockets.</li>
+        <li>Los servidores intercambian tareas y resultados mediante la cola de mensajes.</li>
+        <li>Los workers procesan las tareas y acceden al almacenamiento distribuido.</li>
+        <li>Los resultados regresan al servidor a través de la cola para responder al cliente.</li>
+      </ol>
     </section>
 
-    <section class="section section-muted" id="arquitectura" aria-labelledby="arquitectura-titulo">
-      <div class="container">
-        <div class="section-heading">
-          <p class="section-label">Diagrama del sistema</p>
-          <h2 id="arquitectura-titulo">Arquitectura distribuida</h2>
-          <p>El recorrido muestra cómo se reciben, distribuyen, procesan y almacenan las tareas.</p>
-        </div>
+    <section id="implementacion" aria-labelledby="implementacion-titulo">
+      <h2 id="implementacion-titulo">Implementación local</h2>
+      <p>
+        En la demostración local, el cliente se conecta directamente al servidor
+        TCP. El servidor valida la solicitud y la envía a un
+        <code>ThreadPoolExecutor</code>, que distribuye el trabajo entre sus hilos.
+      </p>
+      <dl>
+        <dt><a href="https://github.com/LeandroMelchiori/PFO_Redes/blob/main/servidor.py"><code>servidor.py</code></a></dt>
+        <dd>Acepta conexiones, valida las solicitudes y coordina el pool de workers.</dd>
+        <dt><a href="https://github.com/LeandroMelchiori/PFO_Redes/blob/main/cliente.py"><code>cliente.py</code></a></dt>
+        <dd>Permite enviar tareas desde la consola y consultar los resultados.</dd>
+        <dt><a href="https://github.com/LeandroMelchiori/PFO_Redes/blob/main/protocolo.py"><code>protocolo.py</code></a></dt>
+        <dd>Serializa los mensajes JSON y controla su formato y tamaño.</dd>
+      </dl>
+      <p>
+        El cliente permite convertir texto a mayúsculas, contar palabras y sumar
+        números. Cada respuesta indica el worker que procesó la tarea.
+      </p>
 
-        <div class="architecture" aria-label="Diagrama de arquitectura distribuida">
-          <div class="architecture-layer">
-            <p class="layer-title">Clientes</p>
-            <div class="node-grid two-columns">
-              <div class="node"><strong>Cliente web</strong><span>Navegador</span></div>
-              <div class="node"><strong>Cliente móvil</strong><span>Aplicación</span></div>
-            </div>
-          </div>
-
-          <div class="flow-arrow" aria-hidden="true"><span>TCP</span></div>
-          <div class="node node-featured node-single"><strong>Balanceador de carga</strong><span>Nginx / HAProxy</span></div>
-          <div class="flow-arrow" aria-hidden="true"><span>Distribución</span></div>
-
-          <div class="architecture-layer">
-            <p class="layer-title">Servidores de sockets</p>
-            <div class="node-grid two-columns">
-              <div class="node"><strong>Servidor 1</strong><span>Gestión de tareas</span></div>
-              <div class="node"><strong>Servidor 2</strong><span>Gestión de tareas</span></div>
-            </div>
-          </div>
-
-          <div class="flow-arrow" aria-hidden="true"><span>Tareas y resultados</span></div>
-          <div class="node node-featured node-single"><strong>Cola de mensajes</strong><span>RabbitMQ</span></div>
-          <div class="flow-arrow" aria-hidden="true"><span>Procesamiento asíncrono</span></div>
-
-          <div class="architecture-bottom">
-            <div class="architecture-layer">
-              <p class="layer-title">Servidores workers</p>
-              <div class="node-grid two-columns">
-                <div class="node"><strong>Worker 1</strong><span>Pool de hilos</span></div>
-                <div class="node"><strong>Worker 2</strong><span>Pool de hilos</span></div>
-              </div>
-            </div>
-            <div class="architecture-layer">
-              <p class="layer-title">Almacenamiento distribuido</p>
-              <div class="node-grid two-columns">
-                <div class="node"><strong>PostgreSQL</strong><span>Usuarios y tareas</span></div>
-                <div class="node"><strong>S3</strong><span>Archivos</span></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <p class="scope-note">
-          La demostración local implementa el servidor TCP y el pool de workers.
-          RabbitMQ, PostgreSQL, S3 y el balanceador representan el diseño objetivo para un despliegue distribuido.
-        </p>
-      </div>
+      <h3>Estructura del repositorio</h3>
+      <pre><code>.
+├── cliente.py             # Cliente de consola del PFO3
+├── protocolo.py           # Intercambio de mensajes JSON por TCP
+├── servidor.py            # Servidor y pool de workers
+├── tests/                 # Pruebas del PFO3
+├── pfo2/                  # Entrega anterior
+└── docs/                  # Documentación en GitHub Pages</code></pre>
     </section>
 
-    <section class="section container" id="implementacion" aria-labelledby="implementacion-titulo">
-      <div class="section-heading">
-        <p class="section-label">Código</p>
-        <h2 id="implementacion-titulo">Implementación en Python</h2>
-        <p>La aplicación usa únicamente módulos incluidos con Python para su ejecución.</p>
-      </div>
+    <section id="ejecucion" aria-labelledby="ejecucion-titulo">
+      <h2 id="ejecucion-titulo">Ejecución local</h2>
+      <p>
+        Se requiere Python 3.10 o superior y <code>pip</code> disponible.
+        La aplicación utiliza solamente módulos de la biblioteca estándar de Python.
+        Los siguientes comandos se ejecutan desde la raíz del repositorio, en PowerShell.
+      </p>
 
-      <div class="implementation-grid">
-        <article class="implementation-card">
-          <p class="file-name">servidor.py</p>
-          <h3>Servidor y workers</h3>
-          <p>Acepta conexiones TCP, valida las solicitudes y deriva cada tarea a un <code>ThreadPoolExecutor</code>.</p>
-        </article>
-        <article class="implementation-card">
-          <p class="file-name">cliente.py</p>
-          <h3>Cliente de consola</h3>
-          <p>Permite enviar tareas, recibir resultados y conocer qué worker realizó el procesamiento.</p>
-        </article>
-        <article class="implementation-card">
-          <p class="file-name">protocolo.py</p>
-          <h3>Protocolo compartido</h3>
-          <p>Serializa mensajes JSON y controla su formato y tamaño antes de enviarlos por el socket.</p>
-        </article>
-      </div>
+      <h3>1. Preparar el entorno</h3>
+      <pre><code>py -m venv .venv
+.\.venv\Scripts\Activate.ps1
+py -m pip install -r requirements.txt</code></pre>
+
+      <h3>2. Iniciar el servidor</h3>
+      <pre><code>py servidor.py</code></pre>
+      <p>
+        De forma predeterminada escucha en <code>127.0.0.1:5000</code>
+        y utiliza cuatro workers. Estos valores se pueden modificar:
+      </p>
+      <pre><code>py servidor.py --host 0.0.0.0 --puerto 5000 --workers 4</code></pre>
+
+      <h3>3. Ejecutar el cliente</h3>
+      <p>En otra terminal, desde la misma carpeta:</p>
+      <pre><code>.\.venv\Scripts\Activate.ps1
+py cliente.py</code></pre>
     </section>
 
-    <section class="section section-dark" id="ejecucion" aria-labelledby="ejecucion-titulo">
-      <div class="container execution-layout">
-        <div>
-          <p class="section-label">Uso local</p>
-          <h2 id="ejecucion-titulo">Ejecución y pruebas</h2>
-          <p>El servidor y el cliente se ejecutan en terminales separadas.</p>
-        </div>
-        <div class="commands">
-          <div>
-            <span>1. Iniciar el servidor</span>
-            <pre><code>py servidor.py</code></pre>
-          </div>
-          <div>
-            <span>2. Ejecutar el cliente</span>
-            <pre><code>py cliente.py</code></pre>
-          </div>
-          <div>
-            <span>3. Ejecutar las pruebas</span>
-            <pre><code>py -m pytest -q</code></pre>
-          </div>
-        </div>
-      </div>
+    <section id="protocolo" aria-labelledby="protocolo-titulo">
+      <h2 id="protocolo-titulo">Protocolo de comunicación</h2>
+      <p>
+        El cliente y el servidor intercambian un objeto JSON por conexión.
+        Cada mensaje termina con un salto de línea para que el receptor pueda
+        reconocer su final.
+      </p>
+      <h3>Ejemplo de solicitud</h3>
+      <pre><code>{
+  "id": "identificador-de-la-tarea",
+  "tarea": {
+    "tipo": "contar_palabras",
+    "texto": "programación sobre redes"
+  }
+}</code></pre>
+
+      <h3>Ejemplo de respuesta</h3>
+      <pre><code>{
+  "ok": true,
+  "id": "identificador-de-la-tarea",
+  "resultado": {
+    "tipo": "contar_palabras",
+    "valor": 3,
+    "worker": "worker_0"
+  }
+}</code></pre>
     </section>
 
-    <section class="section container previous-version" aria-labelledby="anterior-titulo">
-      <div>
-        <p class="section-label">Historial del proyecto</p>
-        <h2 id="anterior-titulo">Entrega anterior</h2>
-        <p>La API Flask con autenticación y SQLite se conserva junto con sus pruebas y capturas.</p>
-      </div>
-      <a class="text-link" href="pfo2/">Abrir documentación del PFO 2</a>
+    <section id="pruebas" aria-labelledby="pruebas-titulo">
+      <h2 id="pruebas-titulo">Pruebas</h2>
+      <p>Instalá las dependencias de desarrollo y ejecutá las pruebas:</p>
+      <pre><code>py -m pip install -r requirements-dev.txt
+py -m pytest -q</code></pre>
+      <p>
+        Las pruebas verifican el procesamiento de tareas, el rechazo de datos
+        incorrectos, la validación del protocolo y el recorrido completo entre
+        el cliente, el servidor y los workers.
+      </p>
+    </section>
+
+    <section aria-labelledby="publicacion-titulo">
+      <h2 id="publicacion-titulo">Publicación y entrega anterior</h2>
+      <p>
+        GitHub Pages aloja esta documentación. El servidor TCP y el cliente
+        de consola se ejecutan de forma local.
+      </p>
+      <p>
+        El PFO 2 se conserva en la carpeta
+        <a href="https://github.com/LeandroMelchiori/PFO_Redes/tree/main/pfo2"><code>pfo2/</code></a>,
+        con su API Flask, cliente, pruebas y capturas.
+        Su <a href="pfo2/">documentación</a> sigue disponible.
+      </p>
     </section>
   </main>
 
-  <footer>
-    <div class="container footer-content">
-      <p>Leandro Melchiori - Comisión D</p>
-      <a href="#inicio">Volver al inicio</a>
-    </div>
+  <footer class="container">
+    <p>Leandro Melchiori - Comisión D</p>
+    <a href="#inicio">Volver al inicio</a>
   </footer>
 </body>
 </html>
